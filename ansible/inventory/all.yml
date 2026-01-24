@@ -2,10 +2,13 @@ all:
   hosts:
     humle:
       ansible_host: 95288538-e027-410d-bcd5-0093f678b576.pub.instances.scw.cloud
+    schous:
+      ansible_host: 192.168.11.172
 
 managed:
   hosts:
     humle:
+    schous:
 
 scienta_net:
   hosts:
