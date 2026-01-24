@@ -1,0 +1,12 @@
+- name: User {{ username }}
+  become: yes
+  user:
+    name: "{{ username }}"
+
+- name: SSH key
+  become: yes
+  ansible.posix.authorized_key:
+    user: "{{ username }}"
+    state: "{{ item.value.state | default('present') }}"
+    key: "{{ item.key }}"
+  loop: "{{ ssh_keys[username] | default({}) | dict2items }}"

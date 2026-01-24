@@ -1,0 +1,21 @@
+- hosts:
+    - managed
+  tasks:
+#    - debug:
+#        msg: "hello world {{ item.key }}, value={{ item.value }}, ssh={{ ssh_keys[item.key] }}"
+#      loop: "{{ users | dict2items }}"
+    - name: /etc/sudoers.d/scienta
+      become: 
+      copy:
+        dest: /etc/sudoers.d/scienta
+        content: |
+          {{ ansible_managed }}
+          %sudo	ALL=(ALL:ALL) ALL
+    - include_role: 
+        name: scienta-user
+      vars:
+        username: "{{ user.key }}"
+        settings: "{{ user.value }}"
+      loop: "{{ users | dict2items }}"
+      loop_control:
+        loop_var: user

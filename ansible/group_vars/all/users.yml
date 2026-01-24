@@ -1,0 +1,5 @@
+ssh_keys:
+  trygvis:
+    ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJAzB6JB/hZ87M6ozsd7lgKxgOacEOZZRxa4ucs11lqq trygvis@conflatorio:
+    ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL3UZyrbXX7WMHqcZCRspkoSIfB6egrbOxXPf1zyZkAw trygvis@arius-v4:
+    ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK3NIIYprtLQFNut7GGf0va7YYFeSXKSgWDQi4qbf5Ph trygvis@biwia:
