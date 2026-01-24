@@ -1,5 +1,13 @@
 users:
   daniel:
+    groups:
+      - sudo
   felix:
+    groups:
+      - sudo
   mk:
+    groups:
+      - sudo
   trygvis:
+    groups:
+      - sudo

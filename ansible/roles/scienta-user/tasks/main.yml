@@ -2,6 +2,8 @@
   become: yes
   user:
     name: "{{ username }}"
+    groups: "{{ user.groups | default([]) }}"
+    shell: "{{ user.shell | default('/usr/bin/bash') }}"
 
 - name: SSH key
   become: yes
