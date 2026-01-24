@@ -1,0 +1,5 @@
+- name: systemctl reload systemd-networkd
+  become: yes
+  systemd:
+    service: systemd-networkd
+    state: reloaded

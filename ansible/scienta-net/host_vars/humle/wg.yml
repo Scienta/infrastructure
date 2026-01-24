@@ -1,0 +1,8 @@
+links:
+  wg0:
+    address: fdb1:4242:b1ef::2/64
+    public_key: "{{ public_keys.humle }}"
+    listen_port: 51820
+    peers:
+      schous:
+        public_key: "{{ public_keys.schous }}"

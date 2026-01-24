@@ -1,0 +1,15 @@
+- hosts:
+    scienta_net
+  tasks:
+    - name: apt install
+      become: yes
+      apt:
+        name:
+          - wireguard
+          - wireguard-tools
+
+    - become: yes
+      systemd:
+        service: systemd-networkd
+        state: started
+        enabled: true

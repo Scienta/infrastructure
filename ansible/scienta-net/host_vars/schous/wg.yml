@@ -1,0 +1,8 @@
+links:
+  wg0:
+    address: fdb1:4242:b1ef::1/64
+    public_key: "{{ public_keys.schous }}"
+    peers:
+      humle:
+        endpoint: humle.scienta.cloud:51820
+        public_key: "{{ public_keys.humle }}"

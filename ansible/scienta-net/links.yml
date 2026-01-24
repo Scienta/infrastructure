@@ -1,0 +1,11 @@
+- hosts:
+    - scienta_net
+  tasks:
+    - include_role: 
+        name: wg-link
+      vars:
+        link_name: "{{ link_l.key }}"
+        link: "{{ link_l.value }}"
+      loop: "{{ links | default({}) | dict2items }}"
+      loop_control:
+        loop_var: link_l

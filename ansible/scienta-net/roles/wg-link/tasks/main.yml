@@ -1,0 +1,49 @@
+- debug:
+    msg: |
+      link_name={{ link_name }}
+      link={{ link }}
+
+- name: "/etc/systemd/network/50-{{ link_name }}.netdev"
+  become: yes
+  copy:
+    dest: "/etc/systemd/network/50-{{ link_name }}.netdev"
+    mode: 0440
+    group: systemd-network
+    content: |
+      [NetDev]
+      Name={{ link_name }}
+      Kind=wireguard
+
+      [WireGuard]
+      PrivateKey={{ private_keys[link_name] }}
+      {% if link.listen_port is defined %}
+      ListenPort={{ link.listen_port }}
+      {% endif %}
+      {% for peer_name in link.peers | default({}) %}
+      {% set peer=link.peers[peer_name] %}
+
+      [WireGuardPeer]
+      PublicKey={{ public_keys[peer_name] }}
+      {% if peer.endpoint is defined %}
+      Endpoint={{ peer.endpoint }}
+      {% endif %}
+      AllowedIPs=::/0
+      PersistentKeepalive=60
+      {% endfor %}
+  notify:
+    - systemctl reload systemd-networkd
+
+- name: "/etc/systemd/network/50-{{ link_name }}.network"
+  become: yes
+  copy:
+    dest: "/etc/systemd/network/50-{{ link_name }}.network"
+    mode: 0440
+    group: systemd-network
+    content: |
+      [Match]
+      Name={{ link_name }}
+
+      [Network]
+      Address={{ link.address }}
+  notify:
+    - systemctl reload systemd-networkd

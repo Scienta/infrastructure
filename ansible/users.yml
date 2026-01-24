@@ -1,6 +1,12 @@
 - hosts:
     - managed
   tasks:
+    - name: apt install
+      become: yes
+      apt:
+        name:
+          - sudo
+
     - name: /etc/sudoers.d/99-scienta
       become: yes
       copy:
