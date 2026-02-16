@@ -8,4 +8,4 @@ ssh_keys:
   felix:
     ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINgSgA8F2q/cjd9ZVC6vfACB4qsFEIoDkvr69wPZ3eId felix@kichererbse.local:
   tobiast:
-    ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHb+VKD6ix0nU+8d0nNlLvyCicEn2BeOSwETUTZe/iIj tobiast@gmail.com
+    ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHb+VKD6ix0nU+8d0nNlLvyCicEn2BeOSwETUTZe/iIj tobiast@gmail.com:
