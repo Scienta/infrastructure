@@ -8,6 +8,9 @@ users:
   mk:
     groups:
       - sudo
+  tobiast:
+    groups:
+      - sudo
   trygvis:
     groups:
       - sudo
