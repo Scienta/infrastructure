@@ -45,5 +45,13 @@
 
       [Network]
       Address={{ link.address }}
+      {% for r in link.routes | default([]) %}
+
+      [Route]
+      Destination={{ r.destination }}
+      Gateway={{ r.gateway }}
+      GatewayOnLink=yes
+      {% endfor %}
+
   notify:
     - systemctl reload systemd-networkd

@@ -1,6 +1,12 @@
 links:
   wg0:
     address: fdb1:4242:b1ef::2/64
+    routes:
+      - destination: fdb1:4242:b1ef:2002::/64
+        gateway: fdb1:4242:b1ef::1
+      - destination: fdb1:4242:b1ef:2003::/64
+        gateway: fdb1:4242:b1ef::1
+
     public_key: "{{ public_keys.humle }}"
     listen_port: 51820
     peers:
