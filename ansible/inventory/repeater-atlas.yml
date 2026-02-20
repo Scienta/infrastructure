@@ -1,0 +1,9 @@
+all:
+  hosts:
+    repeater-atlas:
+      ansible_host: repeater-atlas.vpn.scienta.cloud
+      ansible_ssh_args: '-J humle.scienta.cloud'
+
+managed:
+  hosts:
+    repeater-atlas:

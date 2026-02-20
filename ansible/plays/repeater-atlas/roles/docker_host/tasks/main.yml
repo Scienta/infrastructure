@@ -1,0 +1,6 @@
+- name: apt install docker
+  become: yes
+  apt:
+    name:
+      - docker.io
+      - docker-cli

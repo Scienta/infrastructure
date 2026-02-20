@@ -1,0 +1,25 @@
+- hosts:
+    - repeater-atlas
+  tasks:
+    - name: docker pull
+      become: yes
+      community.docker.docker_image_pull:
+        name: ghcr.io/trygvis/repeater-atlas
+        tag: main
+      register: pull
+
+    - name: image info
+      debug:
+        msg: |
+          Images: {{ pull }}
+
+    - name: docker container
+      become: yes
+      community.docker.docker_container:
+        name: repeater-atlas
+        image: ghcr.io/trygvis/repeater-atlas:main
+        published_ports:
+          - 3000:3000
+        env:
+          DATABASE_URL: "{{ database_url | string }}"
+          RUST_LOG: debug

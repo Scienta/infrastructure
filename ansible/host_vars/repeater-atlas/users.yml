@@ -1,0 +1,21 @@
+users:
+  daniel:
+    groups:
+      - docker
+      - sudo
+  felix:
+    groups:
+      - docker
+      - sudo
+  mk:
+    groups:
+      - docker
+      - sudo
+  tobiast:
+    groups:
+      - docker
+      - sudo
+  trygvis:
+    groups:
+      - docker
+      - sudo

@@ -1,0 +1,6 @@
+- hosts:
+    - repeater-atlas
+  tasks:
+    - import_role:
+        name: docker_host
+      tags: docker_host
