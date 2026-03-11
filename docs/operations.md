@@ -19,6 +19,7 @@
 - Keep Proxmox SDN as the source of truth for workload network intent.
 - Keep OpenFabric as the source of truth for node-to-node underlay reachability.
 - Do not manage FRR directly on cluster nodes outside the Proxmox SDN model.
+- Treat BIRD on `humle` as part of the edge routing design and keep its role limited to cloud-edge routing toward the Proxmox side.
 - Test routing changes first with one non-critical prefix before broadening advertisements.
 - Maintain an inventory of Scaleway-assigned public `/64` prefixes and their mapped SDN networks.
 - Validate cloud-edge to on-prem reachability before changing public prefix advertisements.
@@ -44,7 +45,7 @@ Monitor at least:
 - WireGuard tunnel state
 - OpenFabric neighbor state
 - CPU, memory, and temperature trends
-- Scaleway edge VM health
+- `humle` health
 - Reachability for each advertised public `/64`
 - Drift between documented prefix ownership and active routed networks
 
@@ -71,8 +72,8 @@ Monitor at least:
 
 ### Cloud edge failure
 
-- Treat the Scaleway VM as a critical routing dependency for public ingress.
-- Ensure rebuild steps exist for that VM, including route policy, tunnel setup, and prefix mapping.
+- Treat `humle` as a critical routing dependency for public ingress.
+- Ensure rebuild steps exist for `humle`, including BIRD configuration, route policy, tunnel setup, and prefix mapping.
 - Keep private management access independent from the cloud edge so public-edge failure does not block recovery work.
 
 ### Backup failure

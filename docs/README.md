@@ -12,10 +12,12 @@ This directory contains design documents for a small Proxmox-based datacenter.
 
 - The current repository manages two hosts: `humle` and `schous`.
 - Management connectivity already uses WireGuard.
-- Public edge connectivity is provided by a Scaleway VM.
+- `humle` is the Scaleway VM and public edge.
+- `humle` already runs BIRD for routing related to the Proxmox side.
+- `schous` is the on-prem Proxmox node and initial SDN exit node.
 - Scaleway can allocate multiple IPv6 `/64` prefixes for public-facing networks.
 - The Proxmox SDN design uses OpenFabric as the cluster underlay.
-- These documents describe a target-state design and call out decisions that still need to be made.
+- These documents describe the target design that the platform will implement.
 
 ## Suggested next step
 

@@ -35,7 +35,7 @@ This design fixes the intended platform architecture and operating model. Exact 
 ## Initial footprint
 
 - `schous`: primary on-prem Proxmox node and initial SDN exit node.
-- `humle`: Scaleway-connected remote node used for management reachability and supporting edge connectivity.
+- `humle`: Scaleway VM, public edge, WireGuard endpoint toward `schous`, and BIRD-based routing node.
 
 ## Target-state cluster
 
@@ -53,7 +53,7 @@ This design fixes the intended platform architecture and operating model. Exact 
 - Underlay fabric: Proxmox SDN OpenFabric
 - Overlay networking: Proxmox SDN EVPN
 - North-south routing: external router plus designated Proxmox SDN exit node
-- Public edge: Scaleway VM advertising or forwarding public reachability toward the on-prem environment
+- Public edge: `humle`, running BIRD and forwarding public reachability toward the on-prem environment
 - Public IPv6: delegated `/64` prefixes from Scaleway assigned to public service networks
 - IPAM strategy: external source of truth for prefixes and tenant ownership, with Proxmox SDN implementing the resulting networks
 
@@ -65,7 +65,7 @@ The routing design is:
 - Use Proxmox SDN EVPN for workload network distribution between nodes.
 - Use `schous` as the primary exit node for north-south traffic.
 - Keep the external router as the upstream default gateway domain and policy boundary.
-- Use the Scaleway VM as the public edge and upstream source of public IP reachability.
+- Use `humle` as the public edge and BIRD-based upstream source of public IP reachability.
 - Do not maintain custom per-node FRR logic outside the Proxmox SDN model.
 
 This keeps the control plane centered on Proxmox SDN instead of a hand-built FRR configuration set.
@@ -83,8 +83,9 @@ This split keeps the cluster fabric internal and leaves upstream complexity at c
 
 ## Public edge model
 
-- A VM running on Scaleway acts as the internet-facing edge.
-- The Scaleway VM terminates public routing policy and forwards traffic toward the on-prem environment over the chosen secure transport.
+- `humle` runs on Scaleway and acts as the internet-facing edge.
+- `humle` runs BIRD for routing related to the Proxmox environment.
+- `humle` forwards traffic and routed public prefixes toward `schous` over WireGuard.
 - Public IPv6 service prefixes are allocated as dedicated `/64` networks from Scaleway.
 - Those `/64` networks are then assigned to Proxmox SDN-backed public service networks rather than attached directly to hypervisor management interfaces.
 
@@ -120,7 +121,7 @@ Allocation principles:
 - One Proxmox node hosts compute and the SDN exit-node role.
 - OpenFabric is configured from the start so the underlay model does not change later.
 - The external router uses BGP with that node from the start.
-- The Scaleway VM forwards public prefixes or public ingress toward that same node.
+- `humle` forwards public prefixes and public ingress toward that same node.
 
 ### Small multi-node phase
 
@@ -128,7 +129,7 @@ Allocation principles:
 - Nodes join the OpenFabric underlay first.
 - Additional nodes join the EVPN fabric and advertise attached workload reachability through Proxmox SDN.
 - The external router continues to integrate at the edge instead of learning every internal implementation detail.
-- The Scaleway VM continues to see one stable on-prem integration boundary even as more nodes are added.
+- `humle` continues to see one stable on-prem integration boundary even as more nodes are added.
 
 This preserves the same routing model while adding nodes.
 

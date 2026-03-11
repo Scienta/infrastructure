@@ -118,10 +118,11 @@ Rule set:
 
 Layout:
 
-- A Scaleway VM serves as the public edge.
-- The Scaleway VM owns the delegated public IPv6 prefixes.
-- Traffic for those public prefixes is carried to the on-prem environment over WireGuard.
-- The on-prem exit node injects the relevant public service prefixes into the Proxmox SDN domain.
+- `humle` is the Scaleway VM and public edge.
+- `humle` runs BIRD for routing related to the Proxmox environment.
+- `humle` owns the delegated public IPv6 prefixes.
+- Traffic for those public prefixes is carried from `humle` to `schous` over WireGuard.
+- `schous` injects the relevant public service prefixes into the Proxmox SDN domain.
 
 Design intent:
 
@@ -137,7 +138,7 @@ Layout:
 - Proxmox SDN manages EVPN for east-west reachability of workload networks.
 - `schous` is the primary exit node for north-south traffic.
 - The external on-prem router peers with `schous` over BGP.
-- The Scaleway VM provides the public edge for internet-routable prefixes.
+- `humle` provides the public edge for internet-routable prefixes and handles edge routing with BIRD.
 - Non-exit nodes do not carry separate bespoke upstream routing policy.
 
 Why this model:
@@ -176,8 +177,9 @@ Practical policy:
 
 Path:
 
-- Use the Scaleway VM as the upstream location for public IPv6 space.
-- Route delegated `/64` prefixes from Scaleway toward the on-prem exit-node domain.
+- Use `humle` as the upstream location for public IPv6 space.
+- Use BIRD on `humle` to carry the routed edge policy for those public prefixes.
+- Route delegated `/64` prefixes from `humle` toward `schous`.
 - Expose only explicitly selected public service networks across that edge.
 - Keep hypervisor management and control-plane prefixes private.
 
@@ -192,7 +194,7 @@ Practical use of delegated `/64` prefixes:
 - Start with `schous` as the only on-prem Proxmox node and the only exit node.
 - Bring up OpenFabric and EVPN on day one even in the single-node phase.
 - Use BGP between the on-prem router and `schous` from the start.
-- Route Scaleway-provided public `/64` prefixes to `schous` through the cloud edge VM over WireGuard.
+- Route Scaleway-provided public `/64` prefixes from `humle` to `schous` over WireGuard, with BIRD on `humle` handling the edge routing state.
 - Add additional Proxmox nodes into the same OpenFabric and EVPN design without changing tenant prefixes or upstream topology.
 
 ## Example logical layout
@@ -204,9 +206,10 @@ Administrator
   -> Proxmox nodes
 
 Internet
-  -> Scaleway VM
+  -> humle
   -> delegated public IPv6 /64 prefixes
-  -> On-prem exit node
+  -> WireGuard tunnel
+  -> schous
   -> EVPN/VXLAN overlay
 
 Proxmox nodes
