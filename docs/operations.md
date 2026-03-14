@@ -31,6 +31,7 @@
 - Reserve fixed addresses for gateways, control-plane services, and security appliances before allocating workload addresses.
 - Review public IPv6 `/64` assignments whenever a new public-facing tenant network is created.
 - Do not treat node-local guest configuration as the authoritative record of address usage.
+- Record any VNet that uses a dedicated RA source instead of explicit guest addressing.
 
 ## Backup status
 
@@ -48,6 +49,7 @@ Monitor at least:
 - `humle` health
 - Reachability for each advertised public `/64`
 - Drift between documented prefix ownership and active routed networks
+- Any dedicated RA or DHCPv6 service used for guest addressing
 
 ## Patching
 

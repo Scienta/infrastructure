@@ -27,6 +27,12 @@ Design split:
 - Exit-node behavior handles north-south traffic.
 - External BGP is used only where routes leave the Proxmox SDN domain.
 
+Boundary model:
+
+- The EVPN zone is the shared transport container.
+- The VNet is the actual tenant, routing, and firewall boundary.
+- Each VNet gets its own prefix.
+
 ## Network planes
 
 ## 1. Management
@@ -71,17 +77,27 @@ Requirements:
 
 Implementation:
 
-- VNets: `infra`, `dmz-public`, `tenant-shared`, `lab`
+- EVPN zone: `dc-evpn`
+- VNets: `infra-private`, `shared-public`, `tenant-a-private`, `tenant-a-public`, `tenant-b-private`, `tenant-b-public`, `lab-private`
 
 - Back these workload networks with Proxmox SDN VNets.
 - Use EVPN/VXLAN for multi-node extension.
 - Keep tenant and service addressing stable so the upstream router sees summarized or explicitly assigned prefixes rather than node-local exceptions.
+
+Concrete boundary rule:
+
+- Use one VNet per distinct routing and security boundary.
+- Do not use the EVPN zone itself as the tenant boundary.
+- Use one public `/64` per public VNet.
+- Use one ULA `/64` per private VNet.
+- Do not rely on Proxmox itself to generate Router Advertisements for EVPN VNets.
 
 IPAM guidance:
 
 - Allocate prefixes per tenant VNet, not per node.
 - Keep the same prefixes when workloads move between nodes.
 - Reserve fixed addresses for tenant gateway or firewall appliances before allocating general workload pools.
+- Use explicit IPv6 addressing inside VNets unless a dedicated RA source is deployed for that VNet.
 
 ### Public service networks
 
@@ -92,6 +108,22 @@ Use a separate class of service network for internet-facing workloads:
 - Attach those prefixes to SDN-managed networks instead of directly to hypervisor management bridges.
 - Keep private east-west addressing separate even when workloads also have public IPv6 addresses.
 - Record ownership of each `/64` by tenant, service class, or environment.
+
+Initial allocation model:
+
+- `infra-private`: ULA `/64`
+- `shared-public`: one Scaleway public `/64`
+- `tenant-a-private`: ULA `/64`
+- `tenant-a-public`: one Scaleway public `/64`
+- `tenant-b-private`: ULA `/64`
+- `tenant-b-public`: one Scaleway public `/64`
+- `lab-private`: ULA `/64`
+
+IPv6 host configuration model:
+
+- Public VNets use explicit IPv6 address assignments from their routed public `/64`.
+- Private VNets use explicit ULA assignments.
+- SLAAC is not assumed to work unless a dedicated RA service is introduced inside the VNet.
 
 ## 3. Out-of-band / hardware management
 
@@ -113,6 +145,7 @@ Rule set:
 - Admins connect to WireGuard first.
 - Proxmox UI, SSH, and automation endpoints bind only to management addresses.
 - Public services are published from dedicated guest workloads, not from hypervisor nodes.
+- Router Advertisements for guest addressing are not assumed to originate from Proxmox SDN.
 
 ## Public edge integration
 
@@ -172,6 +205,8 @@ Practical policy:
 - Tenant-private networks use reserved pools for explicit static allocations.
 - Tenant-public networks map one public Scaleway `/64` to one VNet.
 - Public `/64` prefixes are not shared between unrelated tenants.
+
+This means the prefix boundary follows the VNet boundary, not the EVPN zone boundary.
 
 ## Scaleway edge integration
 

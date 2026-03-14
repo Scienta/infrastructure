@@ -113,6 +113,15 @@ Allocation principles:
 - Each public-facing service VNet receives a dedicated Scaleway IPv6 `/64`.
 - Infrastructure networks use stable, reserved addresses for gateways, control-plane services, and monitoring endpoints.
 - Dynamic allocation is not part of the initial design; guest addressing is recorded and allocated explicitly from tenant-owned prefixes.
+- EVPN VNets do not depend on Proxmox-generated Router Advertisements for SLAAC.
+
+## Tenant and network boundary
+
+- The EVPN zone is the shared transport domain for the Proxmox fabric.
+- The VNet is the routing, prefix, and security boundary.
+- Prefixes are allocated per VNet, not per EVPN zone.
+- Public routing policy on `humle` is applied per exposed public VNet.
+- IPv6 addressing inside each VNet is explicit unless a dedicated RA service is introduced for that VNet.
 
 ## Node roles
 
