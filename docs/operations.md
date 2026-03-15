@@ -19,10 +19,10 @@
 - Keep Proxmox SDN as the source of truth for workload network intent.
 - Keep OpenFabric as the source of truth for node-to-node underlay reachability.
 - Do not manage FRR directly on cluster nodes outside the Proxmox SDN model.
-- Treat BIRD on `humle` as part of the edge routing design and keep its role limited to cloud-edge routing toward the Proxmox side.
+- Treat the WireGuard session from `schous` to Route64's Sandefjord instance as part of the public IPv6 edge design.
 - Test routing changes first with one non-critical prefix before broadening advertisements.
-- Maintain an inventory of Scaleway-assigned public `/64` prefixes and their mapped SDN networks.
-- Validate cloud-edge to on-prem reachability before changing public prefix advertisements.
+- Maintain an inventory of the Route64-assigned public `/56` and the `/64` prefixes carved from it for mapped SDN networks.
+- Validate Route64-to-on-prem reachability before changing public prefix advertisements.
 
 ## IPAM operations
 
@@ -46,7 +46,7 @@ Monitor at least:
 - WireGuard tunnel state
 - OpenFabric neighbor state
 - CPU, memory, and temperature trends
-- `humle` health
+- Reachability of the Route64 WireGuard session from `schous`
 - Reachability for each advertised public `/64`
 - Drift between documented prefix ownership and active routed networks
 - Any dedicated RA or DHCPv6 service used for guest addressing
@@ -72,11 +72,11 @@ Monitor at least:
 - Validate OpenFabric neighbor state before assuming the EVPN layer is at fault.
 - In 2-node deployments, be conservative with HA automation.
 
-### Cloud edge failure
+### Public IPv6 edge failure
 
-- Treat `humle` as a critical routing dependency for public ingress.
-- Ensure rebuild steps exist for `humle`, including BIRD configuration, route policy, tunnel setup, and prefix mapping.
-- Keep private management access independent from the cloud edge so public-edge failure does not block recovery work.
+- Treat the Route64 WireGuard session on `schous` as a critical routing dependency for public ingress.
+- Ensure rebuild steps exist for the `schous` to Route64 Sandefjord tunnel, including tunnel configuration, route policy, and prefix mapping.
+- Keep private management access independent from the public IPv6 edge so public-edge failure does not block recovery work.
 
 ### Backup failure
 

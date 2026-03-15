@@ -27,7 +27,7 @@ This design fixes the intended platform architecture and operating model. Exact 
 - Separate management and workload traffic.
 - Start cleanly on a single node and expand to a few nodes without redesigning the routing model.
 - Integrate cleanly with an external on-prem router.
-- Use a cloud-hosted public edge so the on-prem site does not need native public addressing on the hypervisors.
+- Use an external public IPv6 provider so the on-prem site does not need native public addressing on the hypervisors.
 - Make IPv6 a first-class public connectivity model.
 
 ## Baseline topology
@@ -35,7 +35,7 @@ This design fixes the intended platform architecture and operating model. Exact 
 ## Initial footprint
 
 - `schous`: primary on-prem Proxmox node and initial SDN exit node.
-- `humle`: Scaleway VM, public edge, WireGuard endpoint toward `schous`, and BIRD-based routing node.
+- `schous`: WireGuard endpoint toward Route64's Sandefjord instance for public IPv6 reachability.
 
 ## Target-state cluster
 
@@ -53,8 +53,8 @@ This design fixes the intended platform architecture and operating model. Exact 
 - Underlay fabric: Proxmox SDN OpenFabric
 - Overlay networking: Proxmox SDN EVPN
 - North-south routing: external router plus designated Proxmox SDN exit node
-- Public edge: `humle`, running BIRD and forwarding public reachability toward the on-prem environment
-- Public IPv6: delegated `/64` prefixes from Scaleway assigned to public service networks
+- Public IPv6 edge: Route64, with `schous` connected over WireGuard to Route64's Sandefjord instance
+- Public IPv6: a delegated `/56` from Route64, sliced into `/64` networks for public service VNets
 - IPAM strategy: external source of truth for prefixes and tenant ownership, with Proxmox SDN implementing the resulting networks
 
 ## Routing model
@@ -65,7 +65,7 @@ The routing design is:
 - Use Proxmox SDN EVPN for workload network distribution between nodes.
 - Use `schous` as the primary exit node for north-south traffic.
 - Keep the external router as the upstream default gateway domain and policy boundary.
-- Use `humle` as the public edge and BIRD-based upstream source of public IP reachability.
+- Use Route64 as the upstream source of public IPv6 reachability, with `schous` connected over WireGuard.
 - Do not maintain custom per-node FRR logic outside the Proxmox SDN model.
 
 This keeps the control plane centered on Proxmox SDN instead of a hand-built FRR configuration set.
@@ -77,16 +77,16 @@ The intended stack is:
 - OpenFabric for the Proxmox node underlay
 - EVPN/VXLAN for multi-node workload networks
 - Exit-node routing for north-south traffic
-- External BGP or static routing only at the boundary to the on-prem router and cloud edge
+- External BGP or static routing only at the boundary to the on-prem router and the Route64 edge
 
 This split keeps the cluster fabric internal and leaves upstream complexity at clearly defined integration points.
 
 ## Public edge model
 
-- `humle` runs on Scaleway and acts as the internet-facing edge.
-- `humle` runs BIRD for routing related to the Proxmox environment.
-- `humle` forwards traffic and routed public prefixes toward `schous` over WireGuard.
-- Public IPv6 service prefixes are allocated as dedicated `/64` networks from Scaleway.
+- Route64 acts as the upstream internet-facing IPv6 edge.
+- `schous` connects to Route64's Sandefjord instance over WireGuard.
+- Route64 forwards the delegated `/56` toward `schous` over that WireGuard session.
+- Public IPv6 service prefixes are allocated as dedicated `/64` networks carved from that Route64 `/56`.
 - Those `/64` networks are then assigned to Proxmox SDN-backed public service networks rather than attached directly to hypervisor management interfaces.
 
 This separates public address ownership from the physical site while keeping service addressing stable.
@@ -104,13 +104,13 @@ Implementation:
 Design intent:
 
 - Prefix ownership remains understandable even as nodes and tenants are added.
-- Public IPv6 allocations from Scaleway can be tracked cleanly.
+- Public IPv6 allocations from Route64 can be tracked cleanly.
 - The routing and firewall model can refer to stable network objects instead of undocumented address choices.
 
 Allocation principles:
 
 - One VNet maps to one clearly owned prefix per address family.
-- Each public-facing service VNet receives a dedicated Scaleway IPv6 `/64`.
+- Each public-facing service VNet receives a dedicated IPv6 `/64` carved from the Route64 `/56`.
 - Infrastructure networks use stable, reserved addresses for gateways, control-plane services, and monitoring endpoints.
 - Dynamic allocation is not part of the initial design; guest addressing is recorded and allocated explicitly from tenant-owned prefixes.
 - EVPN VNets do not depend on Proxmox-generated Router Advertisements for SLAAC.
@@ -120,7 +120,7 @@ Allocation principles:
 - The EVPN zone is the shared transport domain for the Proxmox fabric.
 - The VNet is the routing, prefix, and security boundary.
 - Prefixes are allocated per VNet, not per EVPN zone.
-- Public routing policy on `humle` is applied per exposed public VNet.
+- Public routing policy from Route64 is applied per exposed public VNet.
 - IPv6 addressing inside each VNet is explicit unless a dedicated RA service is introduced for that VNet.
 
 ## Node roles
@@ -130,7 +130,7 @@ Allocation principles:
 - One Proxmox node hosts compute and the SDN exit-node role.
 - OpenFabric is configured from the start so the underlay model does not change later.
 - The external router uses BGP with that node from the start.
-- `humle` forwards public prefixes and public ingress toward that same node.
+- Route64 forwards public prefixes and public ingress toward that same node over WireGuard.
 
 ### Small multi-node phase
 
@@ -138,7 +138,7 @@ Allocation principles:
 - Nodes join the OpenFabric underlay first.
 - Additional nodes join the EVPN fabric and advertise attached workload reachability through Proxmox SDN.
 - The external router continues to integrate at the edge instead of learning every internal implementation detail.
-- `humle` continues to see one stable on-prem integration boundary even as more nodes are added.
+- Route64 continues to see one stable on-prem integration boundary even as more nodes are added.
 
 This preserves the same routing model while adding nodes.
 

@@ -14,7 +14,7 @@
 - The same model must extend to a few nodes later.
 - The external on-prem router must have a clean, explicit integration point.
 - Operational routing changes should happen in Proxmox SDN first, not in handcrafted FRR files.
-- Public internet reachability should terminate on a cloud edge, not directly on the Proxmox hosts.
+- Public internet reachability should terminate on an external routed edge, not directly on the Proxmox hosts.
 - Public IPv6 should be allocated in clean `/64` units that map to service networks.
 - Address ownership should be visible at the tenant and network level, not buried in guest-local configuration.
 
@@ -103,8 +103,8 @@ IPAM guidance:
 
 Use a separate class of service network for internet-facing workloads:
 
-- Source public IPv6 prefixes from Scaleway.
-- Allocate one `/64` prefix per public service VNet.
+- Source public IPv6 prefixes from a Route64-delegated `/56`.
+- Allocate one `/64` prefix per public service VNet by slicing the Route64 `/56`.
 - Attach those prefixes to SDN-managed networks instead of directly to hypervisor management bridges.
 - Keep private east-west addressing separate even when workloads also have public IPv6 addresses.
 - Record ownership of each `/64` by tenant, service class, or environment.
@@ -112,11 +112,11 @@ Use a separate class of service network for internet-facing workloads:
 Initial allocation model:
 
 - `infra-private`: ULA `/64`
-- `shared-public`: one Scaleway public `/64`
+- `shared-public`: one public `/64` carved from the Route64 `/56`
 - `tenant-a-private`: ULA `/64`
-- `tenant-a-public`: one Scaleway public `/64`
+- `tenant-a-public`: one public `/64` carved from the Route64 `/56`
 - `tenant-b-private`: ULA `/64`
-- `tenant-b-public`: one Scaleway public `/64`
+- `tenant-b-public`: one public `/64` carved from the Route64 `/56`
 - `lab-private`: ULA `/64`
 
 IPv6 host configuration model:
@@ -138,7 +138,7 @@ Requirements:
 
 ## Remote administration
 
-The repository already indicates a WireGuard-based management path between `humle` and `schous`. Keep that pattern and treat WireGuard as the operator entry network, not as a replacement for internal VLAN separation.
+The repository already indicates a WireGuard-based management path for `schous`. Keep that pattern and treat WireGuard as the operator entry network, not as a replacement for internal VLAN separation.
 
 Rule set:
 
@@ -147,21 +147,20 @@ Rule set:
 - Public services are published from dedicated guest workloads, not from hypervisor nodes.
 - Router Advertisements for guest addressing are not assumed to originate from Proxmox SDN.
 
-## Public edge integration
+## Public IPv6 edge integration
 
 Layout:
 
-- `humle` is the Scaleway VM and public edge.
-- `humle` runs BIRD for routing related to the Proxmox environment.
-- `humle` owns the delegated public IPv6 prefixes.
-- Traffic for those public prefixes is carried from `humle` to `schous` over WireGuard.
+- Route64 is the upstream provider for a delegated public IPv6 `/56`.
+- `schous` establishes WireGuard connectivity to Route64's Sandefjord instance.
+- Route64 routes the delegated public IPv6 `/56` toward `schous` over that WireGuard session.
 - `schous` injects the relevant public service prefixes into the Proxmox SDN domain.
 
 Design intent:
 
-- Public address management stays detached from the physical site.
-- The public edge can evolve independently of the Proxmox node count.
-- Internet ingress remains concentrated in one place that is easier to audit and secure.
+- Public address management stays detached from the office ISP and physical site.
+- The public IPv6 edge can evolve independently of the Proxmox node count.
+- Internet ingress remains concentrated at a dedicated upstream boundary that is easier to audit and secure.
 
 ## EVPN and exit-node model
 
@@ -171,7 +170,7 @@ Layout:
 - Proxmox SDN manages EVPN for east-west reachability of workload networks.
 - `schous` is the primary exit node for north-south traffic.
 - The external on-prem router peers with `schous` over BGP.
-- `humle` provides the public edge for internet-routable prefixes and handles edge routing with BIRD.
+- Route64 provides the upstream public IPv6 edge, with `schous` connected to Route64's Sandefjord instance over WireGuard.
 - Non-exit nodes do not carry separate bespoke upstream routing policy.
 
 Why this model:
@@ -203,33 +202,33 @@ Practical policy:
 
 - Management and underlay networks use fixed allocations only.
 - Tenant-private networks use reserved pools for explicit static allocations.
-- Tenant-public networks map one public Scaleway `/64` to one VNet.
+- Tenant-public networks map one `/64` carved from the Route64 `/56` to one VNet.
 - Public `/64` prefixes are not shared between unrelated tenants.
 
 This means the prefix boundary follows the VNet boundary, not the EVPN zone boundary.
 
-## Scaleway edge integration
+## Route64 edge integration
 
 Path:
 
-- Use `humle` as the upstream location for public IPv6 space.
-- Use BIRD on `humle` to carry the routed edge policy for those public prefixes.
-- Route delegated `/64` prefixes from `humle` toward `schous`.
+- Use Route64 as the upstream location for public IPv6 space.
+- Establish WireGuard connectivity from `schous` to Route64's Sandefjord instance.
+- Route the delegated Route64 `/56` toward `schous`.
 - Expose only explicitly selected public service networks across that edge.
 - Keep hypervisor management and control-plane prefixes private.
 
-Practical use of delegated `/64` prefixes:
+Practical use of the delegated Route64 `/56`:
 
-- Assign a dedicated `/64` to each public-facing network, environment, or service tier when that improves clarity.
-- Avoid slicing prefixes smaller than operationally necessary; the delegated `/64` boundary is already convenient and standard for IPv6 service networks.
-- Keep a documented mapping from each Scaleway `/64` to its SDN VNet and consuming workloads.
+- Assign a dedicated `/64` from the delegated `/56` to each public-facing network, environment, or service tier when that improves clarity.
+- Avoid slicing prefixes smaller than operationally necessary; the `/64` boundary is already convenient and standard for IPv6 service networks.
+- Keep a documented mapping from each Route64 `/64` to its SDN VNet and consuming workloads.
 
 ## Deployment progression
 
 - Start with `schous` as the only on-prem Proxmox node and the only exit node.
 - Bring up OpenFabric and EVPN on day one even in the single-node phase.
 - Use BGP between the on-prem router and `schous` from the start.
-- Route Scaleway-provided public `/64` prefixes from `humle` to `schous` over WireGuard, with BIRD on `humle` handling the edge routing state.
+- Route the Route64-provided `/56` to `schous` over the WireGuard session to Route64's Sandefjord instance, then assign `/64`s from it to public VNets.
 - Add additional Proxmox nodes into the same OpenFabric and EVPN design without changing tenant prefixes or upstream topology.
 
 ## Example logical layout
@@ -241,8 +240,8 @@ Administrator
   -> Proxmox nodes
 
 Internet
-  -> humle
-  -> delegated public IPv6 /64 prefixes
+  -> Route64
+  -> delegated public IPv6 /56
   -> WireGuard tunnel
   -> schous
   -> EVPN/VXLAN overlay
@@ -266,5 +265,5 @@ Proxmox nodes
 - Restrict east-west access between workload VLANs by default.
 - Log management-plane failures and repeated auth attempts.
 - Permit routing adjacencies only between the external router and the designated exit-node interfaces.
-- Limit public-prefix advertisement and acceptance to the Scaleway edge path and the designated exit-node path.
+- Limit public-prefix advertisement and acceptance to the Route64 edge path and the designated exit-node path.
 - Keep OpenFabric adjacencies limited to the intended node-to-node fabric interfaces.
