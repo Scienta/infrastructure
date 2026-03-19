@@ -23,6 +23,8 @@
 - Test routing changes first with one non-critical prefix before broadening advertisements.
 - Maintain an inventory of the Route64-assigned public `/56` and the `/64` prefixes carved from it for mapped SDN networks.
 - Validate Route64-to-on-prem reachability before changing public prefix advertisements.
+- When leaking tenant prefixes from a Proxmox SDN VRF to an external BGP peer, use `frr.conf.local` on `schous` with explicit prefix-lists and route-maps instead of broad VRF export.
+- Verify advertised routes from `schous` after each policy change with `vtysh` before assuming the remote peer is at fault.
 
 ## IPAM operations
 

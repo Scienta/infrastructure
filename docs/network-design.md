@@ -190,6 +190,14 @@ Path:
 - Keep management prefixes outside the tenant routing exchange.
 - Do not make the external router responsible for the internal OpenFabric topology.
 
+Practical export model:
+
+- Proxmox SDN installs EVPN VNet routes in the tenant VRF on `schous` rather than in the default BGP table.
+- External unicast BGP peers on `schous` only see prefixes that are explicitly leaked from that VRF.
+- Use `frr.conf.local` on `schous` for selective VRF-to-default leaking when Proxmox's generated FRR config does not expose the required policy directly.
+- Export only the prefixes that need to be reachable by each external peer.
+- Example: leak `fdb1:4242:b1ef:2002::/64` from `vrf_myvpn` to the `humle` BGP peer, while leaving the Route64-backed public `/64` on its direct upstream path.
+
 ## IPAM and prefix ownership
 
 Strategy:
@@ -204,6 +212,7 @@ Practical policy:
 - Tenant-private networks use reserved pools for explicit static allocations.
 - Tenant-public networks map one `/64` carved from the Route64 `/56` to one VNet.
 - Public `/64` prefixes are not shared between unrelated tenants.
+- Prefixes exported to external BGP peers are selected explicitly, not leaked wholesale from the tenant VRF.
 
 This means the prefix boundary follows the VNet boundary, not the EVPN zone boundary.
 

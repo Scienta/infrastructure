@@ -66,6 +66,7 @@ The routing design is:
 - Use `schous` as the primary exit node for north-south traffic.
 - Keep the external router as the upstream default gateway domain and policy boundary.
 - Use Route64 as the upstream source of public IPv6 reachability, with `schous` connected over WireGuard.
+- Keep selective VRF-to-default BGP export policy on `schous` for external peers that should only receive specific tenant prefixes.
 - Do not maintain custom per-node FRR logic outside the Proxmox SDN model.
 
 This keeps the control plane centered on Proxmox SDN instead of a hand-built FRR configuration set.
@@ -114,6 +115,7 @@ Allocation principles:
 - Infrastructure networks use stable, reserved addresses for gateways, control-plane services, and monitoring endpoints.
 - Dynamic allocation is not part of the initial design; guest addressing is recorded and allocated explicitly from tenant-owned prefixes.
 - EVPN VNets do not depend on Proxmox-generated Router Advertisements for SLAAC.
+- External BGP export is prefix-selective; not every VRF route is exposed to every upstream peer.
 
 ## Tenant and network boundary
 
