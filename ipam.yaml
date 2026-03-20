@@ -1,0 +1,53 @@
+- name: scienta-ula-net
+  address: fdb1:4242:b1ef::/48
+  children:
+    - name: p2p-link-net
+      address: fdb1:4242:b1ef::/56
+      children:
+        - name: schous-humle-net
+          address: fdb1:4242:b1ef::/64
+    - name: proxmox1-scw-net
+      address: fdb1:4242:b1ef:2002::/64
+      description: "Connectivity to HTTP gateway"
+      children:
+        - name: repeater-atlas
+          address: fdb1:4242:b1ef:2100::102/64
+
+    - name: proxmox1-myvpn1-subnet1-net
+      address: fdb1:4242:b1ef:2100::/64
+      children:
+        - name: proxmox1-myvpn1-subnet1-gw
+          address: fdb1:4242:b1ef:2100::1
+    - name: proxmox1-myvpn1-subnet2-net
+      address: fdb1:4242:b1ef:2101::/64
+      children:
+        - name: proxmox1-myvpn1-subnet2-gw
+          address: fdb1:4242:b1ef:2101::1
+    - name: proxmox1-myvpn2-subnet1-net
+      address: fdb1:4242:b1ef:2200::/64
+      children:
+        - name: proxmox1-myvpn2-subnet1-gw
+          address: fdb1:4242:b1ef:2200::1
+    - name: proxmox1-myvpn2-subnet2-net
+      address: fdb1:4242:b1ef:2201::/64
+      children:
+        - name: proxmox1-myvpn2-subnet2-gw
+          address: fdb1:4242:b1ef:2201::1
+
+- name: scienta-route64-net
+  description: "Scienta's public v6 addresses. Route64 network #15786"
+  address: 2a11:6c7:1600:3100::/56
+  children:
+    - name: proxmox1-public-net
+      address: 2a11:6c7:1600:3101::/64
+      children:
+        - name: proxmox1-public-gw
+          address: 2a11:6c7:1600:3101::1
+        - name: router-atlas
+          address: 2a11:6c7:1600:3101::102
+
+- name: scienta-route64-link-net
+  address: 2a11:6c7:f23:31::/64
+  children:
+    - name: scienta-route64-link-endpoint
+      address: 2a11:6c7:f23:31::2/64
