@@ -1,0 +1,22 @@
+#!/bin/sh
+
+set -eu
+
+basedir="$(cd ${0%/*} && pwd)"
+
+version=1.11.5
+url="https://github.com/opentofu/opentofu/releases/download/v${version}/tofu_${version}_linux_amd64.tar.gz"
+
+bin="$basedir/.tmp/$version/tofu"
+
+if [ ! -x "$bin" ]
+then
+  mkdir -p "${bin%/*}"
+  wget -O "$bin.tar.gz" "$url"
+  cd "${bin%/*}"
+  tar xf "$bin.tar.gz" tofu
+  chmod +x tofu
+  cd -
+fi
+
+exec "$bin" "${@}"
