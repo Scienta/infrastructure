@@ -1,3 +1,9 @@
 .cache
 vault.pass
 .$*.drawio.bkp
+
+*.local
+*.local.*
+
+.terraform
+!.terraform.lock.hcl
