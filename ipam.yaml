@@ -11,7 +11,7 @@
       description: "Connectivity to HTTP gateway"
       children:
         - name: repeater-atlas
-          address: fdb1:4242:b1ef:2100::102/64
+          address: fdb1:4242:b1ef:2002::102/64
 
     - name: proxmox1-myvpn1-subnet1-net
       address: fdb1:4242:b1ef:2100::/64
