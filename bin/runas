@@ -1,0 +1,21 @@
+#/!bin/sh
+
+set -euo pipefail
+
+basedir="${0%/*}"
+basedir="${basedir%/*}"
+self="${0##*/}"
+
+args=(sops)
+args+=(--extract "[\"$1\"]")
+args+=(-d $basedir/runas.local.yaml)
+
+shift;
+ops=("${@}")
+
+while read key value
+do
+  export "$key=$value"
+done < <("${args[@]}" | sed -n 's,^\([A-Za-z0-9][^:]*\): \(.*\),\1 \2,p')
+
+exec "${ops[@]}"
