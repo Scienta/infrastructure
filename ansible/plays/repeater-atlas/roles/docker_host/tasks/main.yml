@@ -4,3 +4,25 @@
     name:
       - docker.io
       - docker-cli
+
+- debug:
+    msg: "ipam6 network: {{ ipam6_by_name[docker_host_network_name] }}"
+
+- name: /etc/sysctl.d/99-docker_host.conf
+  become: yes
+  notify: reload sysctl
+  template:
+    src: 99-docker_host.conf.j2
+    dest: /etc/sysctl.d/99-docker_host.conf
+
+# Flush the handlers to make sure that the sysctl takes effekt. If not the next
+# step will kill forwarding.
+- meta: flush_handlers
+
+- name: IPv6-only docker bridge network
+  community.docker.docker_network:
+    name: v6net
+    driver: bridge
+    enable_ipv6: true
+    ipam_config:
+      - subnet: "{{ ipam6_by_name[docker_host_network_name] }}"

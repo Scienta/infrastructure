@@ -1,6 +1,23 @@
+- import_playbook: net.yml
 - hosts:
     - repeater-atlas
+  vars:
+    container_name: repeater-atlas
   tasks:
+    - name: docker inspect container
+      become: yes
+      community.docker.docker_container_info:
+        name: "{{ container_name }}"
+      register: info
+
+    - name: container info
+      debug:
+        var: info
+
+    - name: image info
+      debug:
+        msg: "Container id {{ info.container.Image }}"
+
     - name: docker pull
       become: yes
       community.docker.docker_image_pull:
@@ -8,15 +25,29 @@
         tag: main
       register: pull
 
-    - name: image info
+    - name: container info
+      debug:
+        var: info
+
+    - name: registry image info
+      debug:
+        var: pull
+
+    - name: data
       debug:
         msg: |
-          Images: {{ pull }}
+          container id: {{ info.container.Image }}
+          registry id:  {{ pull.image.Id }}
+
+    - name: debug
+      debug:
+        msg: "needs restart: {{ not info.exists or info.container.Image != pull.image.Id }}"
 
     - name: docker container
       become: yes
+      when: not info.exists or info.container.Image != pull.image.Id 
       community.docker.docker_container:
-        name: repeater-atlas
+        name: "{{ container_name }}"
         image: ghcr.io/trygvis/repeater-atlas:main
         published_ports:
           - 3000:3000

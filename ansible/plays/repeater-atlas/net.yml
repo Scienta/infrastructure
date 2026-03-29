@@ -1,0 +1,66 @@
+- hosts:
+    - repeater-atlas
+  vars_files:
+    - "{{ playbook_dir }}/../../../ipam.yml"
+  tasks:
+#    - debug:
+#        var: ansible_facts.interfaces
+#    - debug:
+#        var: ansible_facts.vethffa0162
+#    - debug:
+#        msg: "{{ ansible_facts.interfaces }}"
+#    - debug:
+#        msg: >-
+#          {{
+#            ansible_facts.interfaces
+#            | map('extract', ansible_facts)
+#            | selectattr('ipv6', 'defined')
+#            | map(attribute='ipv6')
+#            | flatten
+#            | map(attribute='address')
+#            | map('ansible.utils.ipaddr', scienta_net_root)
+#            | select
+#            | sort
+#            | list
+#          }}
+    - set_fact:
+        scienta_net_addr: >-
+          {{
+            ansible_facts.interfaces
+            | map('extract', ansible_facts)
+            | selectattr('ipv6', 'defined')
+            | map(attribute='ipv6')
+            | flatten
+            | map(attribute='address')
+            | map('ansible.utils.ipaddr', scienta_net_root)
+            | select
+            | sort
+            | list
+          }}
+    - debug:
+        msg: "Docker network range: {{ ansible_facts.interfaces }}"
+
+    - set_fact:
+        ipam6_by_name: >-
+          {%- set ns = namespace(out={}) -%}
+          {%- for root in (ipam6 | default([])) -%}
+            {%- if root.name is defined and root.address is defined -%}
+              {%- set _ = ns.out.update({root.name: root.address}) -%}
+            {%- endif -%}
+
+            {%- for child in (root.children | default([]) | list) -%}
+              {%- if child.name is defined and child.address is defined -%}
+                {%- set _ = ns.out.update({child.name: child.address}) -%}
+              {%- endif -%}
+
+              {%- for grand in (child.children | default([]) | list) -%}
+                {%- if grand.name is defined and grand.address is defined -%}
+                  {%- set _ = ns.out.update({grand.name: grand.address}) -%}
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endfor -%}
+          {%- endfor -%}
+          {{ ns.out }}
+
+#    - debug:
+#        var: ipam6_by_name

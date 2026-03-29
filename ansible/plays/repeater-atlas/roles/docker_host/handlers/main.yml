@@ -1,0 +1,5 @@
+# Reloads sysctls, but only the ones we want. The sysctl command will fail when
+# setting some kernel keys as the host might be running in a LXC.
+- name: reload sysctl
+  become: yes
+  ansible.builtin.command: sysctl --pattern accept_ra --system

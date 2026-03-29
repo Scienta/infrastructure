@@ -1,0 +1,8 @@
+# {{ ansible_managed }}
+
+# 2 means accept RA messages even if forwarding is done on the interface.
+# Docker will automatically enable forwarding, but Proxmox will give the
+# upstream via RA messages.
+
+net.ipv6.conf.all.accept_ra = 2
+net.ipv6.conf.default.accept_ra = 2
