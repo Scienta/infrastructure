@@ -33,7 +33,6 @@ terraform {
     }
     scaleway = {
       source  = "scaleway/scaleway"
-      version = "2.51.0"
     }
     sops = {
       source  = "lokkersp/sops"
