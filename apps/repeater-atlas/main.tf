@@ -7,12 +7,12 @@ locals {
 }
 
 module "project" {
-  source = "../../../terraform-modules/scw-project"
+  source = "../../terraform-modules/scw-project"
   name   = local.name
 }
 
 module "app" {
-  source                = "../../../terraform-modules/easy-scw-app"
+  source                = "../../terraform-modules/easy-scw-app"
   name                  = local.name
   app_project_id        = module.project.project_id
   scienta_domain        = local.scienta_domain

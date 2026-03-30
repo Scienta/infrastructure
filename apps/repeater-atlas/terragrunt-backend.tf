@@ -5,7 +5,7 @@ terraform {
     endpoints = {
       s3 = "https://s3.fr-par.scw.cloud"
     }
-    key                         = "apps/repeater-atlas/scaleway/terraform.tfstate"
+    key                         = "apps/repeater-atlas/terraform.tfstate"
     region                      = "fr-par"
     skip_credentials_validation = true
     skip_region_validation      = true
