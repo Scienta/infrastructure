@@ -4,8 +4,18 @@
     - name: p2p-link-net
       address: fdb1:4242:b1ef::/56
       children:
-        - name: schous-humle-net
-          address: fdb1:4242:b1ef::/64
+        - name: humle-vpn-net
+          address: fdb1:4242:b1ef:1::/64
+          children:
+            - name: humle-humle-vpn
+              address: fdb1:4242:b1ef:1::1/64
+            - name: schous-humle-vpn
+              address: fdb1:4242:b1ef:1::2/64
+            - name: r01-humle-vpn
+              address: fdb1:4242:b1ef:1::3/64
+            - name: biwia-humle-vpn
+              description: trygvis
+              address: fdb1:4242:b1ef:1::4/64
     - name: proxmox1-scw-net
       address: fdb1:4242:b1ef:2002::/64
       description: "Connectivity to HTTP gateway"
