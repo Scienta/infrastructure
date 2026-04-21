@@ -1,4 +1,4 @@
-# 2026-04-21 07:40:23 by RouterOS 7.22.1
+# 2026-04-21 22:56:49 by RouterOS 7.22.1
 # software id = N27A-WCX4
 #
 # model = RB5009UG+S+
@@ -16,7 +16,8 @@ set [ find default-name=ether7 ] l2mtu=1514
 set [ find default-name=ether8 ] l2mtu=1514
 set [ find default-name=sfp-sfpplus1 ] l2mtu=1514
 /interface wireguard
-add listen-port=18594 mtu=1420 name=wg1
+add comment=humle listen-port=18594 mtu=1420 name=wg1
+add comment=r64_27081 listen-port=59356 mtu=1420 name=wg2
 /interface list
 add comment=defconf name=WAN
 add comment=defconf name=LAN
@@ -45,6 +46,9 @@ add allowed-address=fdb1:4242:b1ef::/48 comment=humle endpoint-address=\
     51.15.129.102 endpoint-port=51820 interface=wg1 name=peer2 \
     persistent-keepalive=15s public-key=\
     "PEcymVYA0mGfRoawHLyrNQyLeiblimbkQLQUJYbutHU="
+add allowed-address=::/0 endpoint-address=185.147.35.234 endpoint-port=20000 \
+    interface=wg2 name=peer3 persistent-keepalive=15s public-key=\
+    "wjThy81OdzZ4ySitpsiaJtVs8jH0GCUx8MaDWVs8vV4="
 /ip address
 add address=192.168.88.1/24 comment=defconf interface=bridge network=\
     192.168.88.0
@@ -91,6 +95,7 @@ add action=masquerade chain=srcnat comment="defconf: masquerade" \
     ipsec-policy=out,none out-interface-list=WAN
 /ipv6 address
 add address=fdb1:4242:b1ef:1::3 interface=wg1
+add address=2a11:6c7:f23:31::2 advertise=no interface=wg2
 /ipv6 firewall address-list
 add address=::/128 comment="defconf: unspecified address" list=bad_ipv6
 add address=::1/128 comment="defconf: lo" list=bad_ipv6
