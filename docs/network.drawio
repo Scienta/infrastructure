@@ -84,7 +84,7 @@
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="w_noBDaeS5eFeE9zJWSs-1" value="nv11 router" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;" vertex="1" parent="1">
+        <mxCell id="w_noBDaeS5eFeE9zJWSs-1" value="r01" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;" vertex="1" parent="1">
           <mxGeometry x="540" y="480" width="120" height="40" as="geometry" />
         </mxCell>
         <mxCell id="i4UbxrsySsybNvoXBmYM-1" value="Scienta physical network" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=24;fontStyle=1;spacingTop=5;" vertex="1" parent="1">
@@ -92,6 +92,9 @@
         </mxCell>
         <mxCell id="ARLzStvhcpSjbq4Vnbaa-1" value="route64" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;" vertex="1" parent="1">
           <mxGeometry x="680" y="240" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="route64-to-r01" value="WireGuard" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=12;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;spacingLeft=5;" edge="1" parent="1" source="ARLzStvhcpSjbq4Vnbaa-1" target="w_noBDaeS5eFeE9zJWSs-1">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="ARLzStvhcpSjbq4Vnbaa-4" value="" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;spacingLeft=5;fontSize=16;" edge="1" parent="1" source="hn_aXxjyU1-nWOCUMf5w-2" target="ARLzStvhcpSjbq4Vnbaa-3">
           <mxGeometry relative="1" as="geometry">

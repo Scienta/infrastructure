@@ -17,14 +17,14 @@
 ## Routing operations
 
 - Keep Proxmox SDN as the source of truth for workload network intent.
-- Keep OpenFabric as the source of truth for node-to-node underlay reachability.
+- Keep the documented routed underlay configuration as the source of truth for node-to-node reachability.
 - Do not manage FRR directly on cluster nodes outside the Proxmox SDN model.
-- Treat the WireGuard session from `schous` to Route64's Sandefjord instance as part of the public IPv6 edge design.
+- Treat the WireGuard session from `r01` to Route64's Sandefjord instance as part of the public IPv6 edge design.
 - Test routing changes first with one non-critical prefix before broadening advertisements.
 - Maintain an inventory of the Route64-assigned public `/56` and the `/64` prefixes carved from it for mapped SDN networks.
 - Validate Route64-to-on-prem reachability before changing public prefix advertisements.
-- When leaking tenant prefixes from a Proxmox SDN VRF to an external BGP peer, use `frr.conf.local` on `schous` with explicit prefix-lists and route-maps instead of broad VRF export.
-- Verify advertised routes from `schous` after each policy change with `vtysh` before assuming the remote peer is at fault.
+- When leaking tenant prefixes from a Proxmox SDN VRF to `r01`, use `frr.conf.local` on `schous` with explicit prefix-lists and route-maps instead of broad VRF export.
+- Verify advertised routes on both `schous` and `r01` after each policy change before assuming the remote peer is at fault.
 
 ## IPAM operations
 
@@ -45,10 +45,10 @@
 Monitor at least:
 
 - Node health and uptime
-- WireGuard tunnel state
-- OpenFabric neighbor state
+- `r01` Route64 WireGuard tunnel state
+- Node-to-node underlay reachability
 - CPU, memory, and temperature trends
-- Reachability of the Route64 WireGuard session from `schous`
+- Reachability of the Route64 WireGuard session from `r01`
 - Reachability for each advertised public `/64`
 - Drift between documented prefix ownership and active routed networks
 - Any dedicated RA or DHCPv6 service used for guest addressing
@@ -71,13 +71,13 @@ Monitor at least:
 
 - Assume split-brain risk before assuming software fault.
 - Validate management and cluster links independently.
-- Validate OpenFabric neighbor state before assuming the EVPN layer is at fault.
+- Validate node-to-node underlay reachability before assuming the EVPN layer is at fault.
 - In 2-node deployments, be conservative with HA automation.
 
 ### Public IPv6 edge failure
 
-- Treat the Route64 WireGuard session on `schous` as a critical routing dependency for public ingress.
-- Ensure rebuild steps exist for the `schous` to Route64 Sandefjord tunnel, including tunnel configuration, route policy, and prefix mapping.
+- Treat the Route64 WireGuard session on `r01` as a critical routing dependency for public ingress.
+- Ensure rebuild steps exist for the `r01` to Route64 Sandefjord tunnel, including tunnel configuration, route policy, and prefix mapping.
 - Keep private management access independent from the public IPv6 edge so public-edge failure does not block recovery work.
 
 ### Backup failure
@@ -95,7 +95,7 @@ Monitor at least:
 - Host inventory sheet
 - Rack and power layout
 - IP/VLAN allocation table
-- OpenFabric interface and addressing table
+- Node underlay interface and addressing table
 - Public IPv6 `/64` allocation table
 - Tenant prefix ownership table
 - Restore runbooks

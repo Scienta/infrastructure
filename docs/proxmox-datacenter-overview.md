@@ -20,13 +20,13 @@ This design fixes the intended platform architecture and operating model. Exact 
 - Keep the platform simple enough to operate without full-time staff.
 - Prefer recovery and observability over high-complexity HA features.
 - Keep routing simple and predictable from day one.
-- Use Proxmox-managed OpenFabric for the cluster underlay.
+- Use a simple documented routed underlay for node-to-node reachability.
 - Align with the Proxmox SDN EVPN model and its exit-node pattern.
 - Minimize manual FRR configuration on Proxmox nodes.
 - Support remote administration over a secured management path.
 - Separate management and workload traffic.
 - Start cleanly on a single node and expand to a few nodes without redesigning the routing model.
-- Integrate cleanly with an external on-prem router.
+- Integrate cleanly with `r01`.
 - Use an external public IPv6 provider so the on-prem site does not need native public addressing on the hypervisors.
 - Make IPv6 a first-class public connectivity model.
 
@@ -35,7 +35,7 @@ This design fixes the intended platform architecture and operating model. Exact 
 ## Initial footprint
 
 - `schous`: primary on-prem Proxmox node and initial SDN exit node.
-- `schous`: WireGuard endpoint toward Route64's Sandefjord instance for public IPv6 reachability.
+- `r01`: installed on-prem routing edge and WireGuard endpoint toward Route64's Sandefjord instance for public IPv6 reachability.
 
 ## Target-state cluster
 
@@ -50,10 +50,10 @@ This design fixes the intended platform architecture and operating model. Exact 
 - Guest types: mostly VMs, with LXC only for low-risk infrastructure services
 - Host OS management: Proxmox-native for hypervisor lifecycle, Ansible for surrounding system configuration
 - Remote access: WireGuard into the management plane
-- Underlay fabric: Proxmox SDN OpenFabric
+- Node underlay: documented routed reachability between Proxmox nodes
 - Overlay networking: Proxmox SDN EVPN
-- North-south routing: external router plus designated Proxmox SDN exit node
-- Public IPv6 edge: Route64, with `schous` connected over WireGuard to Route64's Sandefjord instance
+- North-south routing: `r01` plus designated Proxmox SDN exit node
+- Public IPv6 edge: Route64, with `r01` connected over WireGuard to Route64's Sandefjord instance
 - Public IPv6: a delegated `/56` from Route64, sliced into `/64` networks for public service VNets
 - IPAM strategy: external source of truth for prefixes and tenant ownership, with Proxmox SDN implementing the resulting networks
 
@@ -61,12 +61,12 @@ This design fixes the intended platform architecture and operating model. Exact 
 
 The routing design is:
 
-- Use Proxmox SDN OpenFabric as the internal node-to-node routing fabric.
+- Use documented routed node-to-node reachability as the internal underlay.
 - Use Proxmox SDN EVPN for workload network distribution between nodes.
 - Use `schous` as the primary exit node for north-south traffic.
-- Keep the external router as the upstream default gateway domain and policy boundary.
-- Use Route64 as the upstream source of public IPv6 reachability, with `schous` connected over WireGuard.
-- Keep selective VRF-to-default BGP export policy on `schous` for external peers that should only receive specific tenant prefixes.
+- Keep `r01` as the upstream default gateway domain and policy boundary.
+- Use Route64 as the upstream source of public IPv6 reachability, with `r01` connected over WireGuard.
+- Keep selective VRF-to-default export policy on `schous` for router peers that should only receive specific tenant prefixes.
 - Do not maintain custom per-node FRR logic outside the Proxmox SDN model.
 
 This keeps the control plane centered on Proxmox SDN instead of a hand-built FRR configuration set.
@@ -75,18 +75,19 @@ This keeps the control plane centered on Proxmox SDN instead of a hand-built FRR
 
 The intended stack is:
 
-- OpenFabric for the Proxmox node underlay
+- Routed reachability for the Proxmox node underlay
 - EVPN/VXLAN for multi-node workload networks
 - Exit-node routing for north-south traffic
-- External BGP or static routing only at the boundary to the on-prem router and the Route64 edge
+- BGP or static routing only at the boundary to `r01` and the Route64 edge
 
 This split keeps the cluster fabric internal and leaves upstream complexity at clearly defined integration points.
 
 ## Public edge model
 
 - Route64 acts as the upstream internet-facing IPv6 edge.
-- `schous` connects to Route64's Sandefjord instance over WireGuard.
-- Route64 forwards the delegated `/56` toward `schous` over that WireGuard session.
+- `r01` connects to Route64's Sandefjord instance over WireGuard.
+- Route64 forwards the delegated `/56` toward `r01` over that WireGuard session.
+- `r01` routes selected public service `/64`s toward the Proxmox SDN edge.
 - Public IPv6 service prefixes are allocated as dedicated `/64` networks carved from that Route64 `/56`.
 - Those `/64` networks are then assigned to Proxmox SDN-backed public service networks rather than attached directly to hypervisor management interfaces.
 
@@ -119,7 +120,7 @@ Allocation principles:
 
 ## Tenant and network boundary
 
-- The EVPN zone is the shared transport domain for the Proxmox fabric.
+- The EVPN zone is the shared transport domain for Proxmox SDN workload networking.
 - The VNet is the routing, prefix, and security boundary.
 - Prefixes are allocated per VNet, not per EVPN zone.
 - Public routing policy from Route64 is applied per exposed public VNet.
@@ -130,16 +131,16 @@ Allocation principles:
 ### Single-node phase
 
 - One Proxmox node hosts compute and the SDN exit-node role.
-- OpenFabric is configured from the start so the underlay model does not change later.
-- The external router uses BGP with that node from the start.
-- Route64 forwards public prefixes and public ingress toward that same node over WireGuard.
+- The routed underlay model is configured from the start so it does not change later.
+- `r01` exchanges workload reachability with that node from the start.
+- Route64 forwards public prefixes and public ingress toward `r01` over WireGuard.
 
 ### Small multi-node phase
 
 - `schous` remains the primary exit node.
-- Nodes join the OpenFabric underlay first.
-- Additional nodes join the EVPN fabric and advertise attached workload reachability through Proxmox SDN.
-- The external router continues to integrate at the edge instead of learning every internal implementation detail.
+- Nodes join the routed underlay first.
+- Additional nodes join the EVPN transport domain and advertise attached workload reachability through Proxmox SDN.
+- `r01` continues to integrate at the edge instead of learning every internal implementation detail.
 - Route64 continues to see one stable on-prem integration boundary even as more nodes are added.
 
 This preserves the same routing model while adding nodes.

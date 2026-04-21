@@ -12,10 +12,12 @@ architecture-beta
     group office(cloud)[Office]
 
     service disk(disk)[Storage] in office
+    service r01(server)[r01] in office
     service schous(server)[Schous] in office
 
     humle:B <-- T:schous
-    r64:R <-- L:schous
+    r64:R <-- L:r01
+    r01:B <-- T:schous
 
     schous:R -- L:disk
 ```
