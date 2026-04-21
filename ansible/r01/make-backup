@@ -1,0 +1,8 @@
+#!/bin/bash
+
+host=r01.vpn.scienta.cloud
+
+set -x
+
+ssh "$host" "/export file=export; /system backup save name=backup"
+scp "$host:export.rsc" "${host%%.*}.rsc"
