@@ -6,3 +6,4 @@ set -x
 
 ssh "$host" "/export file=export; /system backup save name=backup"
 scp "$host:export.rsc" "${host%%.*}.rsc"
+dos2unix "${host%%.*}.rsc"
