@@ -1,4 +1,4 @@
-# 2026-04-21 22:56:49 by RouterOS 7.22.1
+# 2026-04-23 19:52:50 by RouterOS 7.22.1
 # software id = N27A-WCX4
 #
 # model = RB5009UG+S+
@@ -23,6 +23,8 @@ add comment=defconf name=WAN
 add comment=defconf name=LAN
 /ip pool
 add name=default-dhcp ranges=192.168.88.10-192.168.88.254
+/routing bgp instance
+add as=64512 disabled=no name=schous
 /routing table
 add disabled=no name=rtab-1
 /disk settings
@@ -93,9 +95,14 @@ add action=drop chain=forward comment=\
 /ip firewall nat
 add action=masquerade chain=srcnat comment="defconf: masquerade" \
     ipsec-policy=out,none out-interface-list=WAN
+/ipv6 route
+add disabled=no dst-address=::/0 gateway=2a11:6c7:f23:31::1 pref-src="" \
+    routing-table=main
 /ipv6 address
 add address=fdb1:4242:b1ef:1::3 interface=wg1
 add address=2a11:6c7:f23:31::2 advertise=no interface=wg2
+add address=2a11:6c7:1600:31ff::1 advertise=no comment="schous link" \
+    interface=bridge
 /ipv6 firewall address-list
 add address=::/128 comment="defconf: unspecified address" list=bad_ipv6
 add address=::1/128 comment="defconf: lo" list=bad_ipv6
@@ -161,6 +168,9 @@ add action=accept chain=forward comment=\
 add action=drop chain=forward comment=\
     "defconf: drop everything else not coming from LAN" in-interface-list=\
     !LAN
+/routing bgp connection
+add afi=ipv6 as=64512 disabled=no instance=schous listen=yes local.role=ibgp \
+    name=bgp1 remote.address=192.168.88.2 .as=64512 routing-table=main
 /system clock
 set time-zone-name=Europe/Oslo
 /system identity
