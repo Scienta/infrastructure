@@ -55,6 +55,10 @@
           address: 2a11:6c7:1600:3101::1
         - name: router-atlas
           address: 2a11:6c7:1600:3101::102
+        - name: v105
+          address: 2a11:6c7:1600:3101::105
+        - name: v106
+          address: 2a11:6c7:1600:3101::106
 
 - name: scienta-route64-link-net
   address: 2a11:6c7:f23:31::/64
