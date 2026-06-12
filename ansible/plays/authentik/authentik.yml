@@ -1,0 +1,9 @@
+- hosts:
+    - scw-02
+  tasks:
+    - import_role:
+        name: docker-service
+      tags:
+        - docker-service
+      vars:
+        docker_service: authentik

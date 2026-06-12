@@ -1,0 +1,59 @@
+services:
+  server:
+    command: server
+    environment:
+      AUTHENTIK_POSTGRESQL__HOST: "{{ PGHOST }}"
+      AUTHENTIK_POSTGRESQL__NAME: "{{ PGDATABASE }}"
+      AUTHENTIK_POSTGRESQL__USER: "{{ PGUSER }}"
+      AUTHENTIK_POSTGRESQL__PASSWORD: "{{ PGPASSWORD }}"
+      AUTHENTIK_SECRET_KEY: "{{ authentik_secret_key }}"
+      AUTHENTIK_POSTGRESQL__SSLROOTCERT: {{ authentik_postgresql__sslrootcert }}
+      AUTHENTIK_POSTGRESQL__SSLMODE: {{ authentik_postgresql__sslmode }}
+      AUTHENTIK_DISABLE_STARTUP_ANALYTICS: {{ authentik_disable_startup_analytics }}
+      AUTHENTIK_DISABLE_UPDATE_CHECK: {{ authentik_disable_update_check }}
+      AUTHENTIK_ERROR_REPORTING__ENABLED: {{ authentik_error_reporting__enabled }}
+    image: {{ authentik_image }}
+    ports:
+      - 9000:9000
+      - 9443:9443
+    restart: unless-stopped
+    shm_size: 512mb
+    volumes:
+      - authentik-data:/data
+      - authentik-custom-templates:/templates
+    logging:
+      driver: journald
+      options:
+        tag: 'authentik-server'
+
+  worker:
+    command: worker
+    environment:
+      AUTHENTIK_POSTGRESQL__HOST: "{{ PGHOST }}"
+      AUTHENTIK_POSTGRESQL__NAME: "{{ PGDATABASE }}"
+      AUTHENTIK_POSTGRESQL__USER: "{{ PGUSER }}"
+      AUTHENTIK_POSTGRESQL__PASSWORD: "{{ PGPASSWORD }}"
+      AUTHENTIK_SECRET_KEY: "{{ authentik_secret_key }}"
+      AUTHENTIK_POSTGRESQL__SSLROOTCERT: {{ authentik_postgresql__sslrootcert }}
+      AUTHENTIK_POSTGRESQL__SSLMODE: {{ authentik_postgresql__sslmode }}
+      AUTHENTIK_DISABLE_STARTUP_ANALYTICS: {{ authentik_disable_startup_analytics }}
+      AUTHENTIK_DISABLE_UPDATE_CHECK: {{ authentik_disable_update_check }}
+      AUTHENTIK_ERROR_REPORTING__ENABLED: {{ authentik_error_reporting__enabled }}
+    image: {{ authentik_image }}
+    restart: unless-stopped
+    shm_size: 512mb
+    user: root
+    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock
+      - authentik-data:/data
+      - authentik-certs:/certs
+      - authentik-custom-templates:/templates
+    logging:
+      driver: journald
+      options:
+        tag: 'authentik-worker'
+
+volumes:
+  authentik-data:
+  authentik-certs:
+  authentik-custom-templates:

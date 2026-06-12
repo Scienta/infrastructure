@@ -5,11 +5,14 @@ all:
     schous:
       ansible_host: schous.vpn.scienta.cloud
       ansible_ssh_args: '-J humle.scienta.cloud'
+    scw-02:
+      ansible_host: scw-02.m.scienta.cloud
 
 managed:
   hosts:
     humle:
     schous:
+    scw-02:
 
 scienta_net:
   hosts:

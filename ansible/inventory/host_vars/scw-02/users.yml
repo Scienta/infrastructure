@@ -1,0 +1,5 @@
+users:
+  trygvis:
+    groups:
+      - sudo
+      - docker

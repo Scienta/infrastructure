@@ -1,0 +1,8 @@
+authentik_image: ghcr.io/goauthentik/server:2026.2.3
+authentik_secret_key:
+authentik_postgresql__sslrootcert: /etc/ssl/certs/ca-certificates.crt
+authentik_postgresql__sslmode: verify-full
+
+authentik_disable_startup_analytics: true
+authentik_disable_update_check: true
+authentik_error_reporting__enabled: false

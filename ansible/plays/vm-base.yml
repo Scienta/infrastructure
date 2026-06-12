@@ -1,0 +1,15 @@
+- hosts:
+    - managed
+  tasks:
+    - name: apt install
+      become: yes
+      apt:
+        name:
+          - htop
+          - sudo
+          - tmux
+
+    - name: Set timezone
+      become: yes
+      community.general.timezone:
+        name: Europe/Oslo
