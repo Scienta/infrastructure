@@ -11,6 +11,12 @@ variable "scienta_domain" {
   default = null
 }
 
+# The port the application is listening on
+variable "port" {
+  type    = number
+  default = 3000
+}
+
 # If set, an external registry will be used. If not set an internal registry
 # will be created
 variable "image_registry" {

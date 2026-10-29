@@ -20,7 +20,7 @@ resource "scaleway_container" "main" {
   tags           = ["scienta-cloud"]
   namespace_id   = scaleway_container_namespace.main.id
   registry_image = local.image
-  port           = 3000
+  port           = var.port
   cpu_limit      = 1024
   memory_limit   = 2048
   min_scale      = 0

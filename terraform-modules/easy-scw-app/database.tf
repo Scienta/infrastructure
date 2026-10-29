@@ -14,7 +14,7 @@ resource "scaleway_sdb_sql_database" "main" {
 resource "scaleway_iam_policy" "main_db_access" {
   for_each = var.serverless_database ? { enabled = true } : {}
 
-  name           = "db_access"
+  name           = format("%s-db_access", var.name)
   description    = "gives app access to serverless database in project"
   application_id = scaleway_iam_application.main.id
   rule {
