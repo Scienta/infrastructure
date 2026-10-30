@@ -46,6 +46,6 @@ variable "make-registry-token" {
 }
 
 output "registry-token" {
-  value = var.make-registry-token ? scaleway_iam_api_key.registry.secret_key : null
+  value     = var.make-registry-token ? scaleway_iam_api_key.registry.secret_key : null
   sensitive = true
 }
