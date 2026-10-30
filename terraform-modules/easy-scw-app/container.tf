@@ -1,10 +1,3 @@
-resource "scaleway_container_namespace" "main" {
-  project_id = var.app_project_id
-
-  name        = var.name
-  description = "Scienta Cloud '${var.name}'"
-}
-
 locals {
   registry = var.image_registry != null ? var.image_registry : scaleway_container_namespace.main.registry_endpoint
   image    = "${local.registry}/${var.image_name}"
