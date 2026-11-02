@@ -23,12 +23,27 @@ module "app" {
   make-registry-token = true
 }
 
+output "scw-organization-id" {
+  value     = module.project.organization_id
+  sensitive = true
+}
+
+output "scw-project-id" {
+  value     = module.project.project_id
+  sensitive = true
+}
+
 output "registry-url" {
   value     = module.app.registry-url
   sensitive = true
 }
 
-output "registry-token" {
-  value     = module.app.registry-token
+output "registry-access-key" {
+  value     = module.app.registry-access-key
+  sensitive = true
+}
+
+output "registry-secret-key" {
+  value     = module.app.registry-secret-key
   sensitive = true
 }

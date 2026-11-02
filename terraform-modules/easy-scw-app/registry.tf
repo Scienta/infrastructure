@@ -45,7 +45,12 @@ variable "make-registry-token" {
   default = false
 }
 
-output "registry-token" {
+output "registry-access-key" {
+  value     = var.make-registry-token ? scaleway_iam_api_key.registry.access_key : null
+  sensitive = true
+}
+
+output "registry-secret-key" {
   value     = var.make-registry-token ? scaleway_iam_api_key.registry.secret_key : null
   sensitive = true
 }
