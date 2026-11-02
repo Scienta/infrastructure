@@ -20,3 +20,11 @@ module "app" {
   serverless_database   = true
   environment_variables = local.environment_variables
 }
+
+output "container_image" {
+  value = module.app.container_image
+}
+
+output "container_namespace_id" {
+  value = module.app.container_namespace_id
+}

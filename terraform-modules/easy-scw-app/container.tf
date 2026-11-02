@@ -42,4 +42,5 @@ resource "scaleway_container" "main" {
   #  secret_environment_variables = {
   #    "key" = "secret"
   #  }
+
 }

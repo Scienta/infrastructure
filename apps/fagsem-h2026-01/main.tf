@@ -11,12 +11,18 @@ module "project" {
 }
 
 module "app" {
-  source                = "../../terraform-modules/easy-scw-app"
-  name                  = local.name
-  app_project_id        = module.project.project_id
-  scienta_domain        = local.scienta_domain
-  image_name            = "fagsem-h2026:main"
-  port                  = 8080
+  source         = "../../terraform-modules/easy-scw-app"
+  name           = "fagsem-h2026"
+  app_project_id = module.project.project_id
+  scienta_domain = local.scienta_domain
+
+  # image_name            = "fagsem-h2026:main"
+  # port                  = 8080
+
+  image_registry        = "docker.io"
+  image_name            = "nginxdemos/hello"
+  port                  = 80
+
   serverless_database   = true
   environment_variables = local.environment_variables
 

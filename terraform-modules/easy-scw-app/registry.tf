@@ -35,7 +35,10 @@ resource "scaleway_iam_policy" "registry" {
   application_id = scaleway_iam_application.registry.id
   rule {
     project_ids          = [var.app_project_id]
-    permission_set_names = ["ContainerRegistryFullAccess"]
+    permission_set_names = [
+      "ContainerRegistryFullAccess",
+      "ContainersFullAccess",
+    ]
   }
 }
 
