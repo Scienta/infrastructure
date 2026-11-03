@@ -16,7 +16,7 @@
 #      creates the container, then the CNAME and the custom domain.
 #
 # plan, apply and destroy need GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in
-# the environment (see terragrunt.hcl); FAGDAG_SLACK_WEBHOOK is optional.
+# the environment (see terragrunt.hcl).
 # Organisers read the secrets with `terragrunt output -raw <name>`.
 
 terraform {
@@ -38,17 +38,13 @@ locals {
     "FAGDAG_TIME_SCALE" = "1.0"
   }
 
-  secret_environment_variables = merge(
-    {
-      "FAGDAG_EVENT_SEED"         = random_password.event_seed.result
-      "FAGDAG_TOKEN_SECRET"       = random_password.token_secret.result
-      "FAGDAG_ADMIN_TOKEN_SECRET" = random_password.admin_token_secret.result
-      "GOOGLE_CLIENT_ID"          = var.google_client_id
-      "GOOGLE_CLIENT_SECRET"      = var.google_client_secret
-    },
-    # Without a webhook the harness doesn't mirror announcements to Slack
-    var.slack_webhook == "" ? {} : { "FAGDAG_SLACK_WEBHOOK" = var.slack_webhook },
-  )
+  secret_environment_variables = {
+    "FAGDAG_EVENT_SEED"         = random_password.event_seed.result
+    "FAGDAG_TOKEN_SECRET"       = random_password.token_secret.result
+    "FAGDAG_ADMIN_TOKEN_SECRET" = random_password.admin_token_secret.result
+    "GOOGLE_CLIENT_ID"          = var.google_client_id
+    "GOOGLE_CLIENT_SECRET"      = var.google_client_secret
+  }
 }
 
 variable "google_client_id" {
@@ -69,12 +65,6 @@ variable "google_client_secret" {
     condition     = length(var.google_client_secret) > 0
     error_message = "Set GOOGLE_CLIENT_SECRET in the environment."
   }
-}
-
-variable "slack_webhook" {
-  type      = string
-  sensitive = true
-  default   = ""
 }
 
 resource "random_password" "event_seed" {

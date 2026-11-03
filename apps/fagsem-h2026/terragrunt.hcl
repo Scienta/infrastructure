@@ -7,5 +7,4 @@ include "root" {
 inputs = {
   google_client_id     = get_env("GOOGLE_CLIENT_ID", "")
   google_client_secret = get_env("GOOGLE_CLIENT_SECRET", "")
-  slack_webhook        = get_env("FAGDAG_SLACK_WEBHOOK", "")
 }
