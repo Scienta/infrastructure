@@ -23,6 +23,11 @@ resource "scaleway_iam_policy" "main_db_access" {
   }
 }
 
+output "database-env" {
+  value     = local.database_env
+  sensitive = true
+}
+
 # output "database_connection_string" {
 #   value = format("postgres://%s:%s@%s",
 #     scaleway_iam_application.app.id,
