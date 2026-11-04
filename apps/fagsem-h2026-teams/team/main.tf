@@ -64,6 +64,8 @@ output "team" {
     url          = module.app.url
     logs_url     = module.app.logs-url
     logs_token   = module.app.logs-token
+    # The scw CLI in deploy.yml won't run without an organisation ID.
+    organization_id = module.project.organization_id
   }
   sensitive = true
 }
