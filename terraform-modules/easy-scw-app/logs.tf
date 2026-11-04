@@ -17,10 +17,14 @@ resource "scaleway_cockpit_token" "logs" {
   }
 }
 
+# A new project has no Cockpit sources until one of its products runs, so
+# read this only once the container exists (during apply, not plan).
 data "scaleway_cockpit_source" "logs" {
   lifecycle {
     enabled = var.make-logs-token
   }
+
+  depends_on = [scaleway_container.main]
 
   project_id = var.app_project_id
   type       = "logs"
