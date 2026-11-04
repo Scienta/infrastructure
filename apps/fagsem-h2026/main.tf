@@ -2,10 +2,6 @@
 # https://fagsem-h2026-harness.scienta.cloud. The teams are in
 # ../fagsem-h2026-teams.
 #
-# This unit replaces apps/fagsem-h2026-01. Destroy that one first
-# (`terragrunt destroy` in apps/fagsem-h2026-01): this directory has its own
-# state key, so nothing moves over.
-#
 # Bring-up runs in two phases, because the container can't start before an
 # image is in the registry:
 #
