@@ -43,6 +43,7 @@ locals {
     "team-7",
     "team-8",
     "team-9",
+    "team-11",
   ])
 
   # 1 keeps every team warm, at the cost of paying for idle containers
@@ -67,15 +68,16 @@ output "teams" {
 # slug depends on all of module.team, so -exclude would drop this output too.
 locals {
   registries = {
-    "team-1" = module.team["team-1"].registry
-    "team-2" = module.team["team-2"].registry
-    "team-3" = module.team["team-3"].registry
-    "team-4" = module.team["team-4"].registry
-    "team-5" = module.team["team-5"].registry
-    "team-6" = module.team["team-6"].registry
-    "team-7" = module.team["team-7"].registry
-    "team-8" = module.team["team-8"].registry
-    "team-9" = module.team["team-9"].registry
+    "team-1"  = module.team["team-1"].registry
+    "team-2"  = module.team["team-2"].registry
+    "team-3"  = module.team["team-3"].registry
+    "team-4"  = module.team["team-4"].registry
+    "team-5"  = module.team["team-5"].registry
+    "team-6"  = module.team["team-6"].registry
+    "team-7"  = module.team["team-7"].registry
+    "team-8"  = module.team["team-8"].registry
+    "team-9"  = module.team["team-9"].registry
+    "team-11" = module.team["team-11"].registry
   }
 }
 
