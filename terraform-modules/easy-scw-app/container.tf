@@ -5,6 +5,14 @@ locals {
 
 locals {
   matches = local.serverless_database == null ? {} : regex("postgres://(?P<pghost>[^:]*):(?P<pgport>[0-9]*)/(?P<pgdatabase>[^?]*)", local.serverless_database.endpoint)
+
+  database_env = local.serverless_database == null ? null : {
+    "PGHOST"     = local.matches["pghost"]
+    "PGPORT"     = local.matches["pgport"]
+    "PGDATABASE" = local.matches["pgdatabase"]
+    "PGUSER"     = scaleway_iam_application.main.id
+    "PGPASSWORD" = scaleway_iam_api_key.main.secret_key
+  }
 }
 
 resource "scaleway_container" "main" {
@@ -14,11 +22,11 @@ resource "scaleway_container" "main" {
   namespace_id   = scaleway_container_namespace.main.id
   registry_image = local.image
   port           = var.port
-  cpu_limit      = 1024
-  memory_limit   = 2048
-  min_scale      = 0
-  max_scale      = 1
-  timeout        = 600
+  cpu_limit      = var.cpu_limit
+  memory_limit   = var.memory_limit
+  min_scale      = var.min_scale
+  max_scale      = var.max_scale
+  timeout        = var.timeout
   privacy        = "public"
   http_option    = "redirected" # "enabled"
   protocol       = "http1"
@@ -33,14 +41,34 @@ resource "scaleway_container" "main" {
       scaleway_iam_api_key.main.secret_key,
       trimprefix(local.serverless_database.endpoint, "postgres://"),
     )
-    "PGHOST"     = local.serverless_database == null ? null : local.matches["pghost"]
-    "PGUSER"     = local.serverless_database == null ? null : scaleway_iam_application.main.id
-    "PGPASSWORD" = local.serverless_database == null ? null : scaleway_iam_api_key.main.secret_key
-    "PGPORT"     = local.serverless_database == null ? null : local.matches["pgport"]
-    "PGDATABASE" = local.serverless_database == null ? null : local.matches["pgdatabase"]
+    "PGHOST"     = local.serverless_database == null ? null : local.database_env["PGHOST"]
+    "PGUSER"     = local.serverless_database == null ? null : local.database_env["PGUSER"]
+    "PGPASSWORD" = local.serverless_database == null ? null : local.database_env["PGPASSWORD"]
+    "PGPORT"     = local.serverless_database == null ? null : local.database_env["PGPORT"]
+    "PGDATABASE" = local.serverless_database == null ? null : local.database_env["PGDATABASE"]
   }, var.environment_variables)
-  #  secret_environment_variables = {
-  #    "key" = "secret"
-  #  }
 
+  # null rather than {} when unused, so apps without secrets plan as before
+  secret_environment_variables = length(var.secret_environment_variables) > 0 ? var.secret_environment_variables : null
+
+  # Provider 2.70.1 has one probe for both start-up and liveness
+  dynamic "health_check" {
+    for_each = var.health_check == null ? [] : [var.health_check]
+    content {
+      http {
+        path = health_check.value.path
+      }
+      interval          = health_check.value.interval
+      failure_threshold = health_check.value.failure_threshold
+    }
+  }
+}
+
+output "container-id" {
+  # The resource ID is "<region>/<uuid>"; scw and the API want the bare UUID
+  value = regex("[^/]+$", scaleway_container.main.id)
+}
+
+output "url" {
+  value = var.scienta_domain != null ? "https://${var.scienta_domain}.scienta.cloud" : "https://${scaleway_container.main.domain_name}"
 }

@@ -5,7 +5,7 @@ terraform {
     endpoints = {
       s3 = "https://s3.fr-par.scw.cloud"
     }
-    key                         = "apps/fagsem-h2026-01/terraform.tfstate"
+    key                         = "apps/fagsem-h2026/terraform.tfstate"
     region                      = "fr-par"
     skip_credentials_validation = true
     skip_region_validation      = true
